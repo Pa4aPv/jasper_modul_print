@@ -3,11 +3,9 @@ package jasper.interfaces;
 import java.util.List;
 
 public interface JasperReportHelper {
-	
-	
-	List <Object> getModeReports ();
-	String getNameReports ();
-	String getNameJRFile ();
-	
-	
+	public List<JasperReportModel> getModelReports();
+
+	public String getNameReports();
+
+	public String getNameJRFile();
 }

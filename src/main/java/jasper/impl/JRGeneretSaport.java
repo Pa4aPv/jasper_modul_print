@@ -1,7 +1,6 @@
 package jasper.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import jasper.interfaces.JasperReportHelper;
+import jasper.interfaces.JasperReportModel;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -25,21 +25,18 @@ import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JRDesignStyle;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.util.JRProperties;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
 public class JRGeneretSaport {
 
-	Path pathTempDir = Files.createTempDirectory("medregSvd").toAbsolutePath();
-	JasperReportHelper completedTemplate;
-	int namb = 0;
-	boolean isPrintReport;
-	List<String> notNullParams;
-
-	// Map<String, Object> params = new HashMap<>();
-	List<Map<String, Object>> listMap;
+	private Path pathTempDir = Files.createTempDirectory("medregSvd").toAbsolutePath();
+	private JasperReportHelper completedTemplate;
+	private int namb = 0;
+	private boolean isPrintReport;
+	private List<String> notNullParams;
+	private List<Map<String, Object>> listMap;
 
 	public JRGeneretSaport(JasperReportHelper completedTemplate) throws IOException {
 		this.completedTemplate = completedTemplate;
@@ -48,8 +45,8 @@ public class JRGeneretSaport {
 	public void start() throws IllegalArgumentException, IllegalAccessException, IOException, JRException {
 		isPrintReport = true;
 		if (completedTemplate != null) {
-			if (completedTemplate.getModeReports() != null) {
-				setParam(completedTemplate.getModeReports());
+			if (completedTemplate.getModelReports() != null) {
+				setParam(completedTemplate.getModelReports());
 				if (isPrintReport)
 					printJReport();
 				else
@@ -81,53 +78,7 @@ public class JRGeneretSaport {
 
 	}
 
-	public Path getPathTempDir() {
-		return pathTempDir;
-	}
-
-	/*
-	 * private void createJReport() throws JRException { try { //InputStream
-	 * reportStream2 = getClass().getResourceAsStream("/jasper/vmt.jrxml");
-	 * InputStream reportStream2 =
-	 * getClass().getResourceAsStream("/jasper/"+reportShablon.getNameJRFile()+
-	 * ".jrxml"); JasperReport jasper =
-	 * JasperCompileManager.compileReport(reportStream2); JasperPrint print =
-	 * JasperFillManager.fillReport(jasper, params, new JREmptyDataSource());
-	 * 
-	 * 
-	 * JRPdfExporter pd= new JRPdfExporter(); SimpleOutputStreamExporterOutput
-	 * output2= new SimpleOutputStreamExporterOutput(Paths.get(getParentDir(),
-	 * "Отчет_"+namb+++".pdf").toFile().getAbsolutePath()); SimpleExporterInput
-	 * input2 = new SimpleExporterInput(print);
-	 * 
-	 * pd.setExporterInput(input2); pd.setExporterOutput(output2);
-	 * 
-	 * pd.exportReport();
-	 * 
-	 * 
-	 * String odtPath = Paths.get(odtDir.toString(), reportShablon.getNameReports()+
-	 * "_" + namb++ + ".odt").toString();
-	 * 
-	 * JROdtExporter oe = new JROdtExporter(); SimpleOutputStreamExporterOutput
-	 * output = new SimpleOutputStreamExporterOutput(odtPath); SimpleExporterInput
-	 * input = new SimpleExporterInput(print); oe.setExporterInput(input);
-	 * oe.setExporterOutput(output); oe.exportReport();
-	 * 
-	 * Path path = FileTools.getTempFileName("medregSvd_", ".rar");
-	 * 
-	 * // ArchTools.zipFile(odtDir, path); System.out.println(odtPath); } catch
-	 * (IOException e) { // TODO Auto-generated catch block e.printStackTrace(); } }
-	 */
-
-	private InputStream getInputStreamJReport() {
-		// C:\medreg\server\manager\target\classes\jasper
-		System.out.println((InputStream) getClass()
-				.getResourceAsStream("/jasper/" + completedTemplate.getNameJRFile() + ".jrxml"));
-		return getClass().getResourceAsStream("/jasper/" + completedTemplate.getNameJRFile() + ".jrxml");
-	}
-
 	private SimpleOutputStreamExporterOutput getOutputStreamJReport() {
-
 		String pdfPath = Paths
 				.get(getPathTempDir().toString(), namb++ + "_" + completedTemplate.getNameReports() + ".pdf")
 				.toString();
@@ -135,20 +86,15 @@ public class JRGeneretSaport {
 		return new SimpleOutputStreamExporterOutput(pdfPath);
 	}
 
-	private JasperDesign getDesignJReport() throws JRException {
-		JRProperties.setProperty("net.sf.jasperreports.extension.registry.factory.fonts=net.sf.jasperreports.engine.fonts.SimpleFontExtensionsRegistryFactory\r\n" + 
-				"net.sf.jasperreports.extension.simple.font.families.arialnarrowfamily", "/jasper/fonts/fonts.xml");
-		JasperDesign design = JRXmlLoader.load(getInputStreamJReport());
+	private JasperReport getCompiledJrxmlFile() throws JRException {
+		JasperDesign design = JRXmlLoader
+				.load(getClass().getResourceAsStream("/jasper/" + completedTemplate.getNameJRFile() + ".jrxml"));
 		JRDesignStyle defaultStyle = new JRDesignStyle();
 		defaultStyle.setName("default_style");
 		defaultStyle.setDefault(true);
 		design.addStyle(defaultStyle);
 		design.setDefaultStyle(defaultStyle);
-		return design;
-	}
-
-	private JasperReport getCompiledJrxmlFile() throws JRException {
-		return JasperCompileManager.compileReport(getDesignJReport());
+		return JasperCompileManager.compileReport(design);
 	}
 
 	private List<JasperPrint> getListJasperPrintJReport() throws JRException {
@@ -162,15 +108,14 @@ public class JRGeneretSaport {
 	}
 
 	/**
-	 * Установка параметров через свойства
-	 * объекта. objectParam - объект с заполненными
-	 * полями.
+	 * Установка параметров через свойства объекта. objectParam - объект с
+	 * заполненными полями.
 	 */
 
-	private void setParam(List<Object> lstObjectParam)
+	private void setParam(List<JasperReportModel> lstObjectParam)
 			throws IllegalArgumentException, IllegalAccessException, IOException {
 		listMap = new ArrayList<Map<String, Object>>();
-		for (Object objectParam : lstObjectParam) {
+		for (JasperReportModel objectParam : lstObjectParam) {
 			Map<String, Object> params = new HashMap<String, Object>();
 			String nameParam = null;
 			String valueParam = null;
@@ -210,21 +155,15 @@ public class JRGeneretSaport {
 	}
 
 	/**
-	 * notNullParams - список параметров которые не
-	 * должны быть пустыми. Если текущий
-	 * параметр Value, есть в списке, возвращаем
-	 * запрет на печать документа.
+	 * notNullParams - список параметров которые не должны быть пустыми. Если
+	 * текущий параметр Value, есть в списке, возвращаем запрет на печать
+	 * документа.
 	 */
 	public void setNotNullParams(List<String> notNullParams) {
 		this.notNullParams = notNullParams;
 	}
 
 	private boolean isMandatoryValue(String inValue) {
-		// notNullParams - список параметров которые не
-		// должны быть пустыми.
-		// Если текущий параметр Value, есть в списке,
-		// возвращаем запрет на
-		// печать документа
 		for (String item : notNullParams) {
 			if (item.equals(inValue)) {
 				return true;
@@ -233,6 +172,10 @@ public class JRGeneretSaport {
 		}
 		this.notNullParams = notNullParams;
 		return false;
+	}
+
+	public Path getPathTempDir() {
+		return pathTempDir;
 	}
 
 	private class ListDataSource implements JRDataSource {
@@ -279,25 +222,6 @@ public class JRGeneretSaport {
 				}
 
 			}
-
-			/*
-			 * if(checkNameField(jrField.getName(), useNameFields))
-			 * 
-			 * String a = jrField.getName();
-			 */
-			/*
-			 * 
-			 * switch (jrField.getName()){ case "f_name" : return row.getName(); case
-			 * "s_str_num" : return row.getS_code(); case "f_s_cond" : return
-			 * row.getS_cond(); case "td_n3" : return row.getTd_n3(); case "td_n4" : return
-			 * row.getTd_n4(); case "td_n5" : return row.getTd_n5(); case "td_n6" : return
-			 * row.getTd_n6(); case "td_n7" : return row.getTd_n7(); case "td_n8" : return
-			 * row.getTd_n8(); case "td_n9" : return row.getTd_n9(); case "td_n10" : return
-			 * row.getTd_n10(); default: return null; }
-			 * 
-			 * if (jrField.getName().equals("f_name")) return row.getName(); else if
-			 * (jrField.getName().equals("f_s_cond")) return row.getS_code(); else
-			 */
 			return result;
 		}
 	}
