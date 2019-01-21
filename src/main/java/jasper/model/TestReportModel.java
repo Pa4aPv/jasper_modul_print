@@ -4,7 +4,7 @@ import jasper.interfaces.ReportModel;
 
 public class TestReportModel implements ReportModel {
 	
-	public	String name = "Женя дугачек, курит табачек :)";
+	public	String name = "СЂР°Р· СЂР°Р· СЂР°Р· :)";
 
 	public String getName() {
 		return name;
