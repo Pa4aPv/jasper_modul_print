@@ -3,8 +3,8 @@
 <!-- 2019-01-18T15:10:05 -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="smo-vrach-snils" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="1ecaae4a-c658-4d29-9b41-ecad20f1434a">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-	<style name="DefaultStyle" isDefault="true" pattern="" pdfFontName="C:\Windows\Fonts\tahoma.ttf" pdfEncoding="Cp1251"/>
-	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF" pdfFontName="C:\Windows\Fonts\tahoma.ttf" pdfEncoding="Cp1251">
+	<style name="DefaultStyle" isDefault="true" pattern=""/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
 			<topPen lineWidth="0.5" lineColor="#000000"/>
@@ -81,7 +81,7 @@
 			<textField pattern="">
 				<reportElement x="0" y="130" width="555" height="20" isRemoveLineWhenBlank="true" uuid="4f4a2e1d-1ddb-45f9-9c19-8f35612ba3fd"/>
 				<textElement textAlignment="Center" verticalAlignment="Top">
-					<font pdfFontName="C:\Windows\Fonts\tahoma.ttf" pdfEncoding="Cp1251" size="14"/>
+					<font fontName="Arial Narrow" size="14"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$P{name}]]></textFieldExpression>
 			</textField>

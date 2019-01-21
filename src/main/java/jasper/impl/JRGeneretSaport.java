@@ -91,6 +91,7 @@ public class JRGeneretSaport {
 				.load(getClass().getResourceAsStream("/jasper/" + completedTemplate.getNameJRFile() + ".jrxml"));
 		JRDesignStyle defaultStyle = new JRDesignStyle();
 		defaultStyle.setName("default_style");
+		defaultStyle.setFontName("Arial Narrow");
 		defaultStyle.setDefault(true);
 		design.addStyle(defaultStyle);
 		design.setDefaultStyle(defaultStyle);
