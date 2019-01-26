@@ -29,39 +29,107 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 
-public class JRGeneretSaport {
+public class JasperReportGenerator {
 
-	private Path pathTempDir = Files.createTempDirectory("medregSvd").toAbsolutePath();
-	private JasperReportHelper completedTemplate;
+	private List<ReportModel> reportModels;
+	private String nameReport;
+	private String nameJRFile;
+	private List<String> notNullParams;
 	private int namb = 0;
 	private boolean isPrintReport;
-	private List<String> notNullParams;
+	private Path pathTempDir = Files.createTempDirectory("medregSvd").toAbsolutePath();
 	private List<Map<String, Object>> listMap;
 
-	public JRGeneretSaport(JasperReportHelper completedTemplate) throws IOException {
-		this.completedTemplate = completedTemplate;
+	/**
+	 * конструктор - стандартная версия формирования отчетов, параметры задаются через setParam;
+	 */
+	public 
+	JasperReportGenerator() throws IOException {
+	}
+
+	/**
+	 * конструктор - поддержка старой версии формирования отчетов, параметры
+	 * задаются через интерфейс JasperReportHelper;
+	 */
+	public JasperReportGenerator(JasperReportHelper completedTemplate) throws IOException {
+		if (completedTemplate == null) {
+			throw new NullPointerException("null JasperReportHelper");
+		}
+		nameReport = completedTemplate.getNameReports();
+		nameJRFile = completedTemplate.getNameJRFile();
+		reportModels = completedTemplate.getModelReports();
+
+	}
+
+	/**
+	 * задает параметры для группы оточетов: 1) группа моделей отчета с заполненными полями;
+	 * 2) имя файла jrxml Шаблона(должны хранится в директории -resources\jasper\;
+	 * 3) название отчета.
+	 */
+	public void setParam(List<ReportModel> reportModels, String nameJRFile, String nameReport ) {
+		this.reportModels = reportModels;
+		this.nameReport = nameReport;
+		this.nameJRFile = nameJRFile;
+
+	}
+
+	/**
+	 * задает параметры для одного отчета: 1) модель отчета с заполненными полями;
+	 * 2) имя файла jrxml Шаблона(должны хранится в директории -resources\jasper\;
+	 * 3) название отчета.
+	 */
+	public void setParam(ReportModel reportModel, String nameJRFile, String nameReport) {
+		reportModels = new ArrayList<ReportModel>();
+		reportModels.add(reportModel);
+		this.nameReport = nameReport;
+		this.nameJRFile = nameJRFile;
+
+	}
+
+	/**
+	 * возвращает temp директорию где хранятся отчеты, для дальнейшей архивации
+	 */
+	public Path getPathTempDir() {
+		return pathTempDir;
+	}
+
+	/**
+	 * notNullParams - список параметров которые не должны быть пустыми. Если
+	 * обязательные параметры пустые, создается документ об ошибке.
+	 */
+	public void setNotNullParams(List<String> notNullParams) {
+		this.notNullParams = notNullParams;
 	}
 
 	public void start() throws IllegalArgumentException, IllegalAccessException, IOException, JRException {
-		isPrintReport = true;
-		if (completedTemplate != null) {
-			if (completedTemplate.getModelReports() != null) {
-				setParam(completedTemplate.getModelReports());
-				if (isPrintReport)
-					printJReport();
-				else
-					printNoData();
-			}
+
+		if (reportModels == null) {
+			throw new NullPointerException("null List<ReportModel>");
 		}
+
+		if (nameReport == null) {
+			throw new NullPointerException("null NameReport");
+		}
+
+		if (nameReport == null) {
+			throw new NullPointerException("null NameJRFile");
+		}
+
+		isPrintReport = true;
+		setListMap(reportModels);
+		if (isPrintReport)
+			printJReport();
+		else
+			printNoData();
+
 	}
 
 	private void printNoData() {
 		try {
 			List<String> lines = Arrays.asList("No data table");
-			Path file = Paths.get(getPathTempDir().toString(),
-					completedTemplate.getNameReports() + "_" + namb++ + ".txt");
-
+			Path file = Paths.get(getPathTempDir().toString(), nameReport + "_" + namb++ + ".txt");
 			Files.write(file, lines, Charset.forName("UTF-8"));
+			System.out.println(file.toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -79,16 +147,14 @@ public class JRGeneretSaport {
 	}
 
 	private SimpleOutputStreamExporterOutput getOutputStreamJReport() {
-		String pdfPath = Paths
-				.get(getPathTempDir().toString(), namb++ + "_" + completedTemplate.getNameReports() + ".pdf")
-				.toString();
+		String pdfPath = Paths.get(getPathTempDir().toString(), namb++ + "_" + nameReport + ".pdf").toString();
 		System.out.println(pdfPath);
+		//pdf можно возвращать так//System.out.println(Paths.get(nameReport + ".pdf").toString());
 		return new SimpleOutputStreamExporterOutput(pdfPath);
 	}
 
 	private JasperReport getCompiledJrxmlFile() throws JRException {
-		JasperDesign design = JRXmlLoader
-				.load(getClass().getResourceAsStream("/jasper/" + completedTemplate.getNameJRFile() + ".jrxml"));
+		JasperDesign design = JRXmlLoader.load(getClass().getResourceAsStream("/jasper/" + nameJRFile + ".jrxml"));
 		JRDesignStyle defaultStyle = new JRDesignStyle();
 		defaultStyle.setName("default_style");
 		defaultStyle.setFontName("Arial Narrow");
@@ -113,7 +179,7 @@ public class JRGeneretSaport {
 	 * заполненными полями.
 	 */
 
-	private void setParam(List<ReportModel> lstObjectParam)
+	private void setListMap(List<ReportModel> lstObjectParam)
 			throws IllegalArgumentException, IllegalAccessException, IOException {
 		listMap = new ArrayList<Map<String, Object>>();
 		for (ReportModel objectParam : lstObjectParam) {
@@ -155,15 +221,6 @@ public class JRGeneretSaport {
 		}
 	}
 
-	/**
-	 * notNullParams - список параметров которые не должны быть пустыми. Если
-	 * текущий параметр Value, есть в списке, возвращаем запрет на печать
-	 * документа.
-	 */
-	public void setNotNullParams(List<String> notNullParams) {
-		this.notNullParams = notNullParams;
-	}
-
 	private boolean isMandatoryValue(String inValue) {
 		for (String item : notNullParams) {
 			if (item.equals(inValue)) {
@@ -171,12 +228,8 @@ public class JRGeneretSaport {
 			}
 
 		}
-		this.notNullParams = notNullParams;
+		//this.notNullParams = notNullParams;
 		return false;
-	}
-
-	public Path getPathTempDir() {
-		return pathTempDir;
 	}
 
 	private class ListDataSource implements JRDataSource {
@@ -213,10 +266,8 @@ public class JRGeneretSaport {
 					try {
 						result = field.get(list.get(idxFild));
 					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 

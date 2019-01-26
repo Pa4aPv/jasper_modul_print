@@ -3,7 +3,7 @@ package jasper.interfaces;
 import java.util.List;
 
 public interface JasperReportHelper {
-	public List<JasperReportModel> getModelReports();
+	public List<ReportModel> getModelReports();
 
 	public String getNameReports();
 
