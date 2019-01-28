@@ -1,8 +1,8 @@
 package jasper.model;
 
-import jasper.interfaces.JasperReportModel;
+import jasper.interfaces.ReportModel;
 
-public class TestReportModel implements JasperReportModel {
+public class TestReportModel implements ReportModel {
 
 	public String name = "раз раз раз :)";
 
